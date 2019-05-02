@@ -1,34 +1,35 @@
 # Pouch Vue
 
-## This Plugin is in maintenance mode due to low availability my end, which means new features will only get added by PRs but bugs will still be fixed in a decent time frame
-
-##### Basic structure copied from https://github.com/buhrmi/vue-pouch with a lot of api changes though
+Basic structure copied from https://github.com/buhrmi/vue-pouch with a lot of
+API changes.
 
 ## Installation
 Install via npm:
 ```
-    npm install --save pouch-vue
+    npm install pouch-vue
 ```
 
-The only requirement is that `pouchdb-live-find` is installed:
+The only requirement is `pouchdb-live-find`:
 ```
     import PouchDB from 'pouchdb-browser'
     PouchDB.plugin(require('pouchdb-find'));
     PouchDB.plugin(require('pouchdb-live-find'));
 ```
 
-If you want to use remote databases (CouchDB, Cloudant, etc.), you should also install the authentication plugin:
+If you want to use remote databases (CouchDB, Cloudant, etc.), you should also
+install the authentication plugin:
 ```
     PouchDB.plugin(require('pouchdb-authentication'));
 ```
+
 Then, plug VuePouch into Vue:
-    import PouchVue from 'pouchVue';
 ```
-    Vue.use(pouchVue, {
-      pouch: PouchDB,    // optional if `PouchDB` is available on the global object
-      defaultDB: 'remoteDbName',  // this is used as a default connect/disconnect database
-      optionDB: {}, // this is used to include a custom fetch() method (see TypeScript example)
-      debug: '*' // optional - See `https://pouchdb.com/api.html#debug_mode` for valid settings (will be a separate Plugin in PouchDB 7.0)
+    import PouchVue from 'pouch-vue';
+    Vue.use(PouchVue, {
+      pouch: PouchDB,             // optional if 'PouchDB' is available on the global object
+      defaultDB: 'remoteDbName',  // default database to use
+      optionDB: {},               // allows custom 'fetch()' method (see TypeScript example)
+      // debug: '*'               // see 'https://pouchdb.com/api.html#debug_mode'
     });
 ```
 
@@ -36,68 +37,121 @@ Then, plug VuePouch into Vue:
 
 ### $pouch
 
-`$pouch` is made available on all vue instances and implements most of pouchdbs current API (https://pouchdb.com/api.html).
-Default events are mounted on each db you connect to: https://pouchdb.com/api.html#events. When a database is created `pouchdb-db-created` is emitted and `pouchdb-db-destroyed` when it's destroyed (which you can listen to with `this.$on(EVENT_NAME)`).
+`$pouch` is made available on all Vue instances and implements most of PouchDB's
+current API (https://pouchdb.com/api.html).  Default events are mounted on each
+database: https://pouchdb.com/api.html#events.  When a database is created
+`pouchdb-db-created` is emitted, and `pouchdb-db-destroyed` when it is destroyed
+(which you can listen to with `this.$on(EVENT_NAME)`).
 
 #### Methods
-All Methods return a promise and mirror or extend the API from pouchdb.
 
-* `$pouch.getSession(OPTIONAL db)`: Returns the current session if already logged in to the defaultDB or given remote DB.
-* `$pouch.connect(username, password, OPTIONAL db)`: Connects you to the defaultDB or given remote DB and returns the user object on success.
-* `$pouch.disconnect(OPTIONAL db)`: Disconnects you from the defaultDB or given remote DB and clears the session data.
-* `$pouch.createUser(name, password, OPTIONAL db)`: Creates a user in the defaultDB or given remote DB and starts a new session.
-* `$pouch.putUser(name, OPTIONAL metadata, OPTIONAL db)`: Update a user in the defaultDB or given remote DB and returns the user object on success. [pouchdb-authentication API : putUser](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbputuserusername-opts--callback)
-* `$pouch.deleteUser(name, OPTIONAL db)`: Delete a user in the defaultDB or given remote DB and returns response. [pouchdb-authentication API : deleteUser](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbdeleteuserusername-opts--callback)
-* `$pouch.signUpAdmin(adminUsername, adminPassword, OPTIONAL db)`: Sign up a new admin and returns response. [pouchdb-authentication API : signUpAdmin](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupadminusername-password--options--callback)
-* `$pouch.deleteAdmin(name, OPTIONAL db)`:Delete an admin and returns response. [pouchdb-authentication API : deleteAdmin](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbdeleteadminusername-opts--callback)
+All methods return a promise, and mirror or extend the API from PouchDB.
+
+* `$pouch.getSession(OPTIONAL db)`: Returns the current session if already
+logged in to the defaultDB or given remote DB.
+* `$pouch.connect(username, password, OPTIONAL db)`: Connects you to the
+defaultDB or given remote DB and returns the user object on success.
+* `$pouch.disconnect(OPTIONAL db)`: Disconnects you from the defaultDB
+or given remote DB and clears the session data.
+* `$pouch.createUser(name, password, OPTIONAL db)`: Creates a user in the
+defaultDB or given remote DB and starts a new session.
+
+* `$pouch.putUser(name, OPTIONAL metadata, OPTIONAL db)`: Update a user in the
+defaultDB or given remote DB and returns the user object on success.
+[pouchdb-authentication API : putUser](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbputuserusername-opts--callback)
+
+* `$pouch.deleteUser(name, OPTIONAL db)`: Delete a user in the defaultDB or
+given remote DB and returns response. [pouchdb-authentication API : deleteUser](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbdeleteuserusername-opts--callback)
+
+* `$pouch.signUpAdmin(adminUsername, adminPassword, OPTIONAL db)`: Sign up a new
+admin and returns response. [pouchdb-authentication API : signUpAdmin](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupadminusername-password--options--callback)
+
+* `$pouch.deleteAdmin(name, OPTIONAL db)`:Delete an admin and returns response.
+[pouchdb-authentication API : deleteAdmin](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbdeleteadminusername-opts--callback)
 ___
+
 * `$pouch.destroy(db)`: same as https://pouchdb.com/api.html#delete_database
 * `$pouch.defaults(options)`: same as https://pouchdb.com/api.html#defaults
 ___
-* `$pouch.sync(localDatabase, remoteDatabase, options)`: Basically the same as PouchDB.sync(local, remote, {live: true, retry: true}). Also, if the browser has an active session cookie, it will fetch session data (username, etc) from the remote server. **BONUS:** If your remote database runs CouchDB 2.0 or higher, you can also specify a Mango Selector that is used to filter documents coming from the remote server. Callback functions will be invoked with the name `pouchdb-[method]-[type]`. So in this case you can use `this.$on('pouchdb-sync-change', callback(data))` to listen when a change occurs. See https://pouchdb.com/api.html#sync for a full list of events you can use.
 
-**default options (will be merged with the options passed in)**:
- ```
+* `$pouch.sync(localDatabase, remoteDatabase, options)`: Basically the same as
+`PouchDB.sync(local, remote, {live: true, retry: true})`. Also, if the browser
+has an active session cookie, it will fetch session data (username, etc) from
+the remote server. *BONUS:* If your remote database runs CouchDB 2.0 or
+higher, you can also specify a *Mango* selector that is used to filter documents
+coming from the remote server. Callback functions will be invoked with the
+name `pouchdb-[method]-[type]`. So in this case you can use
+`this.$on('pouchdb-sync-change', callback(data))` to listen when a change
+occurs. See https://pouchdb.com/api.html#sync for a full list of events you
+can use.
+
+Default options (will be merged with the options passed in)
+```
 {
     live: true,
     retry: true,
-    back_off_function: (delay) => {
-        if (delay === 0) {
-            return 1000;
-        }
-        return delay * 3;
-    },
+    back_off_function: (delay) => Math.max(1000, delay * 3)
 }
 ```
-**For example:**
+
+Example:
 ```
-    $pouch.sync('complaints', 'https:/42.233.1.44/complaints', {
+    $pouch.sync('complaints', 'https://example.org/complaints', {
         selector: {
             type: 'complaint',
             assignee: this.session.name
         }
-      });
-
+    });
 ```
-* `$pouch.push(localDatabase, remoteDatabase, options)`: Like https://pouchdb.com/api.html#replication - replicate-to. Also, if the browser has an active session cookie, it will fetch session data (username, etc) from the remote server.
-* `$pouch.pull(localDatabase, remoteDatabase, options)`: Like https://pouchdb.com/api.html#replication - replicate-from. Also, if the browser has an active session cookie, it will fetch session data (username, etc) from the remote server.
-* `$pouch.changes(database, options)`: Listens for change on a db like: https://pouchdb.com/api.html#changes
-* `$pouch.put/post/remove/get(database, ...)`: Same as db.put/post/remove/get(...) https://pouchdb.com/api.html#create_document
-* `$pouch.query(db, 'map/reduce function', options)`: like https://pouchdb.com/api.html#query_database
-* `$pouch.allDocs(db, options)`: like https://pouchdb.com/api.html#batch_fetch but `include_docs` is set to true by default. You can however overwrite it of course.
+
+* `$pouch.push(localDatabase, remoteDatabase, options)`: Like
+https://pouchdb.com/api.html#replication - replicate-to. Also, if the browser
+has an active session cookie, it will fetch session data (username, etc) from
+the remote server.
+
+* `$pouch.pull(localDatabase, remoteDatabase, options)`: Like
+https://pouchdb.com/api.html#replication - replicate-from. Also, if the
+browser has an active session cookie, it will fetch session data (username,
+etc) from the remote server.
+
+* `$pouch.changes(database, options)`: Listens for change on a db like:
+https://pouchdb.com/api.html#changes
+
+* `$pouch.put/post/remove/get(database, ...)`: Same as in PouchDB, with DB
+as first argument passed; https://pouchdb.com/api.html#create_document
+
+* `$pouch.query(db, 'map/reduce function', options)`: like
+https://pouchdb.com/api.html#query_database
+
+* `$pouch.allDocs(db, options)`: like https://pouchdb.com/api.html#batch_fetch
+but `include_docs` is set to `true` by default.
+
 * `$pouch.bulkDocs(db, options)`: https://pouchdb.com/api.html#batch_create
+
 * `$pouch.compact(db, options)`: https://pouchdb.com/api.html#compaction
+
 * `$pouch.viewCleanup(db)`: https://pouchdb.com/api.html#view_cleanup
+
 * `$pouch.info(db)`: like https://pouchdb.com/api.html#database_information
+
 * `$pouch.find(db, request)`: like https://pouchdb.com/api.html#query_index
+
 * `$pouch.createIndex(db, index)`: like https://pouchdb.com/api.html#create_index
-* `$pouch.putAttachment(db, docId, [rev], attachmentObject(id,data,type)`: like https://pouchdb.com/api.html#save_attachment
-* `$pouch.getAttachment(db, docId, attachmentId)`: like https://pouchdb.com/api.html#get_attachment
-* `$pouch.deleteAttachment(db, docId, attachmentId, docRev)`: like https://pouchdb.com/api.html#delete_attachment
+
+* `$pouch.putAttachment(db, docId, [rev], attachmentObject(id,data,type)`: like
+https://pouchdb.com/api.html#save_attachment
+
+* `$pouch.getAttachment(db, docId, attachmentId)`: like
+https://pouchdb.com/api.html#get_attachment
+
+* `$pouch.deleteAttachment(db, docId, attachmentId, docRev)`: like
+https://pouchdb.com/api.html#delete_attachment
+
 * `$pouch.close(db)`: https://pouchdb.com/api.html#close_database
 
 #### Non-Reactive Properties
-* `vm.$databases`: the pouchdb instances which are shared across all components.
+
+* `vm.$databases`: The PouchDB instances that are shared by all components.
 
 ## Examples
 
@@ -115,13 +169,22 @@ ___
 
 <script>
   export default {
-    // VuePouch adds a `pouch` config option to all components.
+
+    // VuePouch adds a 'pouch' config option to all components:
     pouch: {
-      // The simplest usage. queries all documents from the "todos" pouch database and assigns them to the "todos" vue property.
-      todos: {/*empty selector*/}
+      /* The simplest usage. Queries all documents from the "todos" database
+       * and assigns them to the Vue property with the same name ("todos").
+       */
+      todos: {}  // this is an empty Mango selector
     },
+
     created: function() {
-      // Send all documents to the remote database, and stream changes in real-time. Note if you use filters you need to set them correctly for pouchdb and couchdb. You can set them for each direction separatly: options.push/options.pull. PouchDB might not need the same filter to push documents as couchdb to send the filtered requested documents.
+      /* Send all documents to the remote database, and stream changes in
+       * real-time. If you use filters you need to set them correctly for
+       * PouchDB and CouchDB. You can set them for each direction separately:
+       * "options.push" / "options.pull". PouchDB might not need the same filter
+       * to push documents as CouchDB to send the filtered requested documents.
+       */
       this.$pouch.sync('todos', 'http://localhost:5984/todos', options);
     }
   }
@@ -132,34 +195,43 @@ ___
 
 ```vue
 <template>
-  Show people that are <input v-model="age"> years old.
-  <div v-for="person in people">
-    {{ person.name }}
-  </div>
+  Show people who are <input v-model="age"> years old.
+
+  <div v-for="person in people"> {{ person.name }} </div>
 </template>
 
 <script>
   export default {
+
     data () {
       return {
         resultsPerPage: 25,
         currentPage: 1
       }
     },
-    // Use the pouch property to configure the component to (reactively) read data from pouchdb.
+
+    // Use the 'pouch' property to configure the component to (reactively)
+    // read data from PouchDB.
+
     pouch: {
-      // The function returns a Mango-like selector that is run against the `people` database.
-      // The result of the query is assigned to the `people` property.
+
+      /* The function returns a Mango-like selector that is run against the
+       * 'people' database.  The result of the query is assigned to the 'people'
+       * property.
+       */
       people() {
-        if (!this.age) return;
-        return {age: this.age, type: "person"}
+        if (this.age) return { age: this.age, type: "person" }
       },
-      // You can also specify the database dynamically (local or remote), as well as limits, skip and sort order:
+
+      /* You can also specify the database dynamically (local or remote), as
+       * well as limits, skip and sort order.
+       */
       peopleInOtherDatabase() {
         return {
-          database: this.selectedDatabase, // you can pass a database string or a pouchdb instance
-          selector: {type: "person"},
-          sort: [{name: "asc"}],
+          database: this.selectedDatabase, // You can pass a database string or
+                                           // a PouchDB instance.
+          selector: { type: "person" },
+          sort: [ {name: "asc"} ],
           limit: this.resultsPerPage,
           skip: this.resultsPerPage * (this.currentPage - 1)
         }
@@ -190,12 +262,12 @@ module.exports = {
 ```
 
 ### TypeScript
-TypeScript example with a TypeScript file to include the pouch-vue plugin and a Single File Component
-using the plugin.
+
+TypeScript example with a TypeScript file to include the `pouch-vue` plugin, and
+a *Single File Component* using the plugin.
 
 main.ts
 ```vue
-
 import { Component, Vue } from 'vue-property-decorator';
 import PouchDB from 'pouchdb-browser';
 import lf from 'pouchdb-find';
@@ -222,8 +294,8 @@ Vue.use(pouchVue,{
 })
 
 new Vue({});
-
 ```
+
 Todos.vue
 ```vue
 <template>
@@ -238,10 +310,10 @@ Todos.vue
 </template>
 
 <script lang="ts">
-
 @Component({
   pouch: {
-  // The simplest usage. queries all documents from the "todos" pouch database and assigns them to the "todos" vue property.
+  // The simplest usage. queries all documents from the "todos" pouch
+  // database and assigns them to the "todos" vue property.
       todos: {/*empty selector*/}
   }
 })
@@ -255,11 +327,9 @@ export default class Todos extends Vue {
   // destroyed () { }
 }
 </script>
-
 ```
 
 ### User Authentication
-
 ```vue
  this.$pouch.connect(this.credentials.username, this.credentials.password)
     .then((res) => {
