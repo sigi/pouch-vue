@@ -774,7 +774,8 @@ let vuePouch = {
     },
 };
 
-let api = {
+export default {
+
     install: (Vue, options = {}) => {
         vue = Vue;
 
@@ -787,6 +788,5 @@ let api = {
 
         Vue.mixin(vuePouch);
     },
-};
 
-module.exports = api;
+};
